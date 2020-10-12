@@ -10,53 +10,49 @@ import keras.backend as k
 from keras.layers import Flatten, Dense, Dropout
 from keras.models import Sequential
 
+class Model():
 
-# Load mnist dataset
+    def __init__(self, data):
+
+        (self.x_train, self.y_train), (self.x_test, self.y_test) = data
+        self.x_train, self.x_test = self.x_train/255.0, self.x_test/255.0
+        self.y_train = k.cast(self.y_train, 'float32')
+        self.y_test = k.cast(self.y_test, 'float32')
+        # Model
+        self.model = self.build_model()
+        # Print a model summary
+        self.model.summary()
+        self.compile_model()
+        self.fit_model()
+
+    def build_model(self):
+        model = Sequential()
+        input_layer = Flatten(input_shape=(28 ,28))
+        model.add(input_layer)
+        hidden_layer_1 = Dense(128, activation='relu')
+        model.add(hidden_layer_1)
+        hidden_layer_2 = Dropout(0.3)
+        model.add(hidden_layer_2)
+        outer_layer = Dense(10, activation='softmax')
+        model.add(outer_layer)
+        return model
+
+    def create_loss(self, y_true, y_pred):
+        loss = k.sum(k.log(y_true) - k.log(y_pred))
+        return loss
+
+    def compile_model(self):
+        self.model.compile(loss=self.create_loss, optimizer='adam', metrics=['accuracy'])
+
+    def fit_model(self):
+        self.model.fit(self.x_train, self.y_train, epochs=5)
+
+    def return_score(self):
+        score = self.model.evaluate(self.x_test, self.y_test)
+        print('accuracy', score[1])
+
+
 mnist = keras.datasets.mnist
+x = Model(mnist.load_data())
+x.return_score()
 
-# x_train is the list of images y_train is the labels assigned to each image
-
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
-# Normalise values to range (0,1)
-x_train, x_test = x_train/255.0, x_test/255.0
-
-# y_train = [tf.float32(i) for i in y_train]
-# y_test = [numpy.float16(i) for i in y_test]
-y_train = k.cast(y_train, 'float32')
-y_test = k.cast(y_test, 'float32')
-print(x_train.shape)
-
-# model=model.keras.Sequential()
-model = Sequential()
-# optimizer='adam'
-# (28,28) represents the dimensions of image in pixels
-input_layer = Flatten(input_shape=(28, 28))
-model.add(input_layer)
-
-# Activation function is relu
-hidden_layer_1 = Dense(128, activation='relu')
-model.add(hidden_layer_1)
-
-# Percentage of nodes destroyed
-hidden_layer_2 = Dropout(0.3)
-model.add(hidden_layer_2)
-
-# Activation function is softmax
-output_layer = Dense(10, activation='softmax')
-model.add(output_layer)
-
-
-def custom_loss(y_true, y_pred):
-    return k.sum(k.log(y_true) - k.log(y_pred))
-
-
-# Building model with appropriate loss function and optimizer.
-# Metrics is values you want to show i.e in this case accuracy
-model.compile(loss=custom_loss, optimizer='adam', metrics=['accuracy'])
-
-# Training sets for code with 5 iterations of training
-model.fit(x_train, y_train, epochs=5)
-
-# The final test set checking the models performance vs actual test data
-score = model.evaluate(x_test, y_test)
-print(' accuracy ', score[1])
