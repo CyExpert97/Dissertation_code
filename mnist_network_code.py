@@ -27,7 +27,7 @@ class Model():
 
     def build_model(self):
         model = Sequential()
-        input_layer = Flatten(input_shape=(28 ,28))
+        input_layer = Flatten(input_shape=(28, 28))
         model.add(input_layer)
         hidden_layer_1 = Dense(128, activation='relu')
         model.add(hidden_layer_1)
@@ -37,12 +37,12 @@ class Model():
         model.add(outer_layer)
         return model
 
-    def create_loss(self, y_true, y_pred):
-        loss = k.sum(k.log(y_true) - k.log(y_pred))
-        return loss
+    # def create_loss(self, y_true, y_pred):
+    #     loss = k.sum(k.log(y_true) - k.log(y_pred))
+    #     return loss
 
     def compile_model(self):
-        self.model.compile(loss=self.create_loss, optimizer='adam', metrics=['accuracy'])
+        self.model.compile(loss=Loss_function.loss, optimizer='adam', metrics=['accuracy'])
 
     def fit_model(self):
         self.model.fit(self.x_train, self.y_train, epochs=5)
@@ -52,7 +52,17 @@ class Model():
         print('accuracy', score[1])
 
 
+class Loss_function():
+
+
+    @staticmethod
+    def loss(y_true, y_pred):
+        loss = k.sum(k.log(y_true) - k.log(y_pred))
+        return loss
+
+
 mnist = keras.datasets.mnist
 x = Model(mnist.load_data())
 x.return_score()
+
 
