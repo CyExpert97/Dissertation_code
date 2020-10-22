@@ -41,7 +41,7 @@ class Model():
         model.add(outer_layer)
         return model
 
-    def step(self, x_true, y_true):
+    def gradient_tape(self, x_true, y_true):
         with tf.GradientTape() as tape:
             pred = self.model(x_true)
             loss = sparse_categorical_crossentropy(y_true, pred)
