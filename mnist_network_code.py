@@ -22,6 +22,7 @@ class Model():
         self.y_test = k.cast(self.y_test, 'float32')
         # Model
         self.model = self.build_model()
+        self.opt = Adam()
         # Print a model summary
         self.model.summary()
         self.compile_model()
@@ -40,22 +41,21 @@ class Model():
         model.add(outer_layer)
         return model
 
-    def step(self, y_true, y_pred):
+    def step(self, x_true, y_true):
         with tf.GradientTape() as tape:
-            pred = self.model(y_true)
-            loss = sparse_categorical_crossentropy(y_pred, pred)
+            pred = self.model(x_true)
+            loss = sparse_categorical_crossentropy(y_true, pred)
 
         grads = tape.gradient(loss, self.model.trainable_variables)
-        opt = Adam
-        opt.apply_gradients(zip(grads, self.model.trainable_variables))
-        return opt
+        self.opt.apply_gradients(zip(grads, self.model.trainable_variables))
+
 
     def create_loss(self, y_true, y_pred):
         loss = k.sum(k.log(y_true) - k.log(y_pred))
         return loss
 
     def compile_model(self):
-        self.model.compile(loss='sparse_categorical_crossentropy', optimizer=self.step, metrics=['accuracy'])
+        self.model.compile(loss='sparse_categorical_crossentropy', optimizer=self.opt, metrics=['accuracy'])
 
     def fit_model(self):
         self.model.fit(self.x_train, self.y_train, epochs=5)
@@ -91,4 +91,3 @@ class Loss_function():
 mnist = keras.datasets.mnist
 x = Model(mnist.load_data())
 x.return_score()
-
