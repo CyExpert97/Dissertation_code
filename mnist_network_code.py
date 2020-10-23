@@ -6,6 +6,7 @@ Created on Thu Mar 12 23:06:42 2020
 import tensorflow as tf
 import keras
 import keras.backend as k
+from tensorflow.keras.layers import Conv2D, Flatten, Dense, Dropout, MaxPooling2D
 from keras.layers import Flatten, Dense, Dropout
 from keras.models import Sequential
 from tensorflow.keras.losses import sparse_categorical_crossentropy
@@ -23,7 +24,7 @@ class Model:
         self.y_train = k.cast(self.y_train, 'float32')
         self.y_test = k.cast(self.y_test, 'float32')
         self.batch_size = 128
-        self.epochs = 50
+        self.epochs = 1
         self.weight_init = RandomNormal()
         # Model
         self.model = self.build_model()
@@ -37,7 +38,12 @@ class Model:
 
     def build_model(self):
         model = Sequential()
-        input_layer = Flatten(input_shape=(28, 28))
+        model.add(Conv2D(32, kernel_size=(3, 3), activation='relu',
+                         kernel_initializer=self.weight_init, input_shape=(28, 28, 1)))
+        model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer=self.weight_init))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.25))
+        input_layer = Flatten()
         model.add(input_layer)
         hidden_layer_1 = Dense(128, activation='relu', kernel_initializer=self.weight_init)
         model.add(hidden_layer_1)
@@ -74,8 +80,9 @@ class Model:
     #     self.model.fit(self.x_train, self.y_train, epochs=self.epochs)
 
     def return_score(self):
-        score = self.model.evaluate(self.x_test, self.y_test)
-        print('accuracy', score[1])
+        print('\nAccuracy:', self.model.evaluate(self.x_test, self.y_test, verbose=0)[1])
+        # score = self.model.evaluate(self.x_test, self.y_test)
+        # print('accuracy', score[1])
 
 
 # class Loss_function:
