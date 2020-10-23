@@ -24,14 +24,14 @@ class Model:
         self.y_test = k.cast(self.y_test, 'float32')
         self.batch_size = 128
         self.epochs = 50
-        # self.weight_init = RandomNormal()
+        self.weight_init = RandomNormal()
         # Model
         self.model = self.build_model()
         self.opt = Adam(lr=0.001)
         # Print a model summary
         self.model.summary()
-        self.compile_model()
         self.training_loop()
+        self.compile_model()
         # self.fit_model()
         # self.step(self.x_train, self.y_train)
 
@@ -39,11 +39,11 @@ class Model:
         model = Sequential()
         input_layer = Flatten(input_shape=(28, 28))
         model.add(input_layer)
-        hidden_layer_1 = Dense(128, activation='relu')
+        hidden_layer_1 = Dense(128, activation='relu', kernel_initializer=self.weight_init)
         model.add(hidden_layer_1)
         hidden_layer_2 = Dropout(0.3)
         model.add(hidden_layer_2)
-        outer_layer = Dense(10, activation='softmax')
+        outer_layer = Dense(10, activation='softmax', kernel_initializer=self.weight_init)
         model.add(outer_layer)
         return model
 
@@ -65,7 +65,7 @@ class Model:
             print('=', end='')
             for i in range(bat_per_epoch):
                 n = i * self.batch_size
-                self.step(self.x_train[n:n + self.batch_size], self.y_train[n:n + self.batch_size])
+                self.step(self.x_train[n:(n + self.batch_size)], self.y_train[n:n + self.batch_size])
 
     def compile_model(self):
         self.model.compile(loss='sparse_categorical_crossentropy', optimizer=self.opt, metrics=['accuracy'])
