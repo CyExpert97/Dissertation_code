@@ -10,9 +10,11 @@ from keras.layers import Flatten, Dense, Dropout
 from keras.models import Sequential
 from tensorflow.keras.losses import sparse_categorical_crossentropy
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.initializers import RandomNormal
 import math
 
-class Model():
+
+class Model:
 
     def __init__(self, data):
 
@@ -21,15 +23,17 @@ class Model():
         self.y_train = k.cast(self.y_train, 'float32')
         self.y_test = k.cast(self.y_test, 'float32')
         self.batch_size = 128
-        self.epochs = 20
+        self.epochs = 50
+        # self.weight_init = RandomNormal()
         # Model
         self.model = self.build_model()
-        self.opt = Adam()
+        self.opt = Adam(lr=0.001)
         # Print a model summary
         self.model.summary()
         self.compile_model()
-        self.fit_model()
-        #self.step(self.x_train, self.y_train)
+        self.training_loop()
+        # self.fit_model()
+        # self.step(self.x_train, self.y_train)
 
     def build_model(self):
         model = Sequential()
@@ -51,33 +55,35 @@ class Model():
         grads = tape.gradient(loss, self.model.trainable_variables)
         self.opt.apply_gradients(zip(grads, self.model.trainable_variables))
 
-    def create_loss(self, y_true, y_pred):
-        loss = k.sum(k.log(y_true) - k.log(y_pred))
-        return loss
+    # def create_loss(self, y_true, y_pred):
+    #     loss = k.sum(k.log(y_true) - k.log(y_pred))
+    #     return loss
 
-    def compile_model(self):
+    def training_loop(self):
         bat_per_epoch = math.floor(len(self.x_train) / self.batch_size)
         for epoch in range(self.epochs):
             print('=', end='')
             for i in range(bat_per_epoch):
                 n = i * self.batch_size
                 self.step(self.x_train[n:n + self.batch_size], self.y_train[n:n + self.batch_size])
+
+    def compile_model(self):
         self.model.compile(loss='sparse_categorical_crossentropy', optimizer=self.opt, metrics=['accuracy'])
 
-    def fit_model(self):
-        self.model.fit(self.x_train, self.y_train, epochs=self.epochs)
+    # def fit_model(self):
+    #     self.model.fit(self.x_train, self.y_train, epochs=self.epochs)
 
     def return_score(self):
         score = self.model.evaluate(self.x_test, self.y_test)
         print('accuracy', score[1])
 
 
-class Loss_function:
-
-    @staticmethod
-    def loss(y_true, y_pred):
-        loss = k.sum(k.log(y_true) - k.log(y_pred))
-        return loss
+# class Loss_function:
+#
+#     @staticmethod
+#     def loss(y_true, y_pred):
+#         loss = k.sum(k.log(y_true) - k.log(y_pred))
+#         return loss
 
 
 mnist = keras.datasets.mnist
