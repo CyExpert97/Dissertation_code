@@ -6,7 +6,7 @@ Created on Thu Mar 12 23:06:42 2020
 import tensorflow as tf
 import keras
 import keras.backend as k
-from tensorflow.keras.layers import Conv2D, Flatten, Dense, Dropout, MaxPooling2D
+from tensorflow.keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Flatten, Dense, Dropout
 from keras.models import Sequential
 from tensorflow.keras.losses import sparse_categorical_crossentropy
@@ -20,11 +20,12 @@ class Model:
     def __init__(self, data):
 
         (self.x_train, self.y_train), (self.x_test, self.y_test) = data
-        self.x_train, self.x_test = self.x_train/255.0, self.x_test/255.0
+        self.x_train, self.x_test = (self.x_train/255.0).reshape((-1, 28, 28, 1)), \
+                                    (self.x_test/255.0).reshape((-1, 28, 28, 1))
         self.y_train = k.cast(self.y_train, 'float32')
         self.y_test = k.cast(self.y_test, 'float32')
         self.batch_size = 128
-        self.epochs = 1
+        self.epochs = 5
         self.weight_init = RandomNormal()
         # Model
         self.model = self.build_model()
@@ -80,9 +81,8 @@ class Model:
     #     self.model.fit(self.x_train, self.y_train, epochs=self.epochs)
 
     def return_score(self):
-        print('\nAccuracy:', self.model.evaluate(self.x_test, self.y_test, verbose=0)[1])
-        # score = self.model.evaluate(self.x_test, self.y_test)
-        # print('accuracy', score[1])
+        score = self.model.evaluate(self.x_test, self.y_test)
+        print('accuracy', score[1])
 
 
 # class Loss_function:
