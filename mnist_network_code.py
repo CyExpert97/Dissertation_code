@@ -25,7 +25,7 @@ class Model:
         self.y_train = k.cast(self.y_train, 'float32')
         self.y_test = k.cast(self.y_test, 'float32')
         self.batch_size = 128
-        self.epochs = 5
+        self.epochs = 20
         self.weight_init = RandomNormal()
         # Model
         self.model = self.build_model()
@@ -75,7 +75,7 @@ class Model:
                 self.step(self.x_train[n:(n + self.batch_size)], self.y_train[n:n + self.batch_size])
 
     def compile_model(self):
-        self.model.compile(loss='sparse_categorical_crossentropy', optimizer=self.opt, metrics=['accuracy'])
+        self.model.compile(loss=Loss_function.loss, optimizer=self.opt, metrics=['accuracy'])
 
     # def fit_model(self):
     #     self.model.fit(self.x_train, self.y_train, epochs=self.epochs)
@@ -85,12 +85,12 @@ class Model:
         print('accuracy', score[1])
 
 
-# class Loss_function:
-#
-#     @staticmethod
-#     def loss(y_true, y_pred):
-#         loss = k.sum(k.log(y_true) - k.log(y_pred))
-#         return loss
+class Loss_function:
+
+    @staticmethod
+    def loss(y_true, y_pred):
+        loss = k.sum(k.log(y_true) - k.log(y_pred))
+        return loss
 
 
 mnist = keras.datasets.mnist
